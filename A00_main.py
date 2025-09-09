@@ -10,27 +10,12 @@ from B11_sensors_list import get_sensors, get_list_of_sensor_types, choose_senso
 from B12_sensor_informations import derivedDatapoints_list, select_derived_datapoints, extract_data, create_dataframes_by_type
 from B20_assets import get_assets, get_dict_of_id_assets, extract_asset, create_dataframes_by_type as create_assets_df
 from B30_excel_file import export_dict_of_dfs_to_excel
-from config_handler import get_or_ask
 from PIL import Image
-
-# --- CONFIG FILE PATH (local utilisateur Windows) ---
-CONFIG_FILE = r"C:\Temp\API\config.json"
 
 st.set_page_config(page_title="API Beyond Interface", layout="wide")
 logo = Image.open("SIXENSE_logo.png")
 st.image(logo, width=200)
 st.title("Application API Beyond Monitoring")
-
-# --- RESET CONFIG BUTTON ---
-if st.sidebar.button("🗑️ Réinitialiser la config locale"):
-    try:
-        if os.path.exists(CONFIG_FILE):
-            os.remove(CONFIG_FILE)
-            st.sidebar.success("✅ Configuration locale réinitialisée.")
-        else:
-            st.sidebar.info("ℹ️ Aucun fichier config trouvé à supprimer.")
-    except Exception as e:
-        st.sidebar.error(f"Erreur lors de la suppression : {e}")
 
 # --- AUTHENTIFICATION ---
 st.header("1. Connexion")
@@ -38,39 +23,21 @@ email = st.text_input("Email")
 password = st.text_input("Mot de passe", type="password")
 
 if email and password:
-    # On ne persiste que l'email (pas le mot de passe)
-    email = get_or_ask("email", fallback_value=email)
-
     headers = login(email, password)
 
     # --- PROJET ---
     st.header("2. Sélection du projet")
 
-    # ======= Windows only: recherche du projects_list.txt =======
-    home = Path.home()
-    candidate_roots = [
-        home / "OneDrive - VINCI Construction",
-        home / "VINCI Construction",
-    ]
-    subpath = Path("Ingénierie Monitoring - Documents/General/0-R&D/1-API Beyond/1-Liste des projets/projects_list.txt")
-
-    projects_list_path = None
-    for root in candidate_roots:
-        p = root / subpath
-        if p.exists():
-            projects_list_path = p
-            break
-
-    if not projects_list_path:
+    # 🔹 FICHIER DANS LE REPO (à la racine)
+    FILE_IN_REPO = Path(__file__).parent / "projects_list.txt"
+    if not FILE_IN_REPO.exists():
         st.error(
-            "❌ Impossible de localiser `projects_list.txt`.\n\nChemins testés :\n" +
-            "\n".join(f"- {str(r / subpath)}" for r in candidate_roots) +
-            "\n\nVérifie que OneDrive est synchronisé et que l’arborescence existe."
+            f"❌ `projects_list.txt` introuvable à la racine du repo :\n- {FILE_IN_REPO}\n"
+            "Ajoute ce fichier au dépôt (même dossier que ce script)."
         )
         st.stop()
 
-    file_path = str(projects_list_path)
-    # ============================================================
+    file_path = str(FILE_IN_REPO)
 
     project_id_val, project_name = project_id(file_path)
     project_key = project_id_val
