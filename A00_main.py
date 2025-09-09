@@ -1,10 +1,8 @@
 import streamlit as st
 import os
-import platform
 from pathlib import Path
 import datetime
 import pandas as pd
-import getpass
 
 from B00_login import login
 from B10_select_project_id import project_id
@@ -15,7 +13,7 @@ from B30_excel_file import export_dict_of_dfs_to_excel
 from config_handler import get_or_ask
 from PIL import Image
 
-# --- CONFIG FILE PATH ---
+# --- CONFIG FILE PATH (local utilisateur Windows) ---
 CONFIG_FILE = r"C:\Temp\API\config.json"
 
 st.set_page_config(page_title="API Beyond Interface", layout="wide")
@@ -48,21 +46,12 @@ if email and password:
     # --- PROJET ---
     st.header("2. Sélection du projet")
 
-    # Bloc minimal : Windows natif vs WSL/Linux
-    if platform.system() == "Windows":
-        home = Path.home()
-        candidate_roots = [
-            home / "OneDrive - VINCI Construction",
-            home / "VINCI Construction",
-        ]
-    else:  # Linux / WSL
-        win_user = getpass.getuser()  # ex: "krsixense"
-        home = Path("/mnt/c/Users") / win_user
-        candidate_roots = [
-            home / "OneDrive - VINCI Construction",
-            home / "VINCI Construction",
-        ]
-
+    # ======= Windows only: recherche du projects_list.txt =======
+    home = Path.home()
+    candidate_roots = [
+        home / "OneDrive - VINCI Construction",
+        home / "VINCI Construction",
+    ]
     subpath = Path("Ingénierie Monitoring - Documents/General/0-R&D/1-API Beyond/1-Liste des projets/projects_list.txt")
 
     projects_list_path = None
@@ -74,13 +63,14 @@ if email and password:
 
     if not projects_list_path:
         st.error(
-            "Impossible de localiser `projects_list.txt`.\n\nChemins testés :\n" +
+            "❌ Impossible de localiser `projects_list.txt`.\n\nChemins testés :\n" +
             "\n".join(f"- {str(r / subpath)}" for r in candidate_roots) +
             "\n\nVérifie que OneDrive est synchronisé et que l’arborescence existe."
         )
         st.stop()
 
     file_path = str(projects_list_path)
+    # ============================================================
 
     project_id_val, project_name = project_id(file_path)
     project_key = project_id_val
