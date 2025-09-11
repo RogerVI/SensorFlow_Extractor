@@ -4,3 +4,4 @@ Palais des Congres : 64ca3bcf9cd046c3c735058d
 Nice - Murs tirantes : 62712807dde2f9426338ceb3
 Toulouse - Faculte de pharmacie : 66ab4b10860483ee130596ef
 Cagnes sur mer - Murs Tremie Peage : 66dae3284576f1c749e2fd4d
+Paris - Austerlitz - Instrumentation Rampe : 66bb7572d8cd8826366734ea
